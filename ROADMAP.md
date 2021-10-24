@@ -3,8 +3,8 @@
 This document represents draft development plans.
 
 
-1. [ ] [Create function that creates player](#create-player)
-2. [ ] [Create function that creates location](#create-location)
+1. [x] [Create function that creates player](#create-player)
+2. [x] [Create function that creates location](#create-location)
 3. [ ] [Create function that moves player to location](#move-player-to-location)
 4. [ ] [Create function that creates NPC](#create-npc)
 5. [ ] [Create function that starts conversation between player and NPC](#start-conversation)
