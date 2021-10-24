@@ -8,7 +8,12 @@ import (
 
 func New() {
 	newPlayer := rpg.NewPlayer("Nova")
-	fmt.Println(newPlayer.Name())
-	newLocation := rpg.NewLocation("Gludio")
-	fmt.Println(newLocation.Name())
+	fmt.Println("Created player: " + newPlayer.Name())
+
+	Gludio := rpg.NewLocation("Gludio")
+	fmt.Println("Created location: " + Gludio.Name())
+
+	fmt.Println(newPlayer.Name() + " is currently in " + newPlayer.Whereabouts().Name())
+	newPlayer.MoveToLocation(Gludio)
+	fmt.Println(newPlayer.Name() + " teleported to " + newPlayer.Whereabouts().Name())
 }
