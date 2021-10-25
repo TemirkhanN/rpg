@@ -7,6 +7,9 @@ import (
 )
 
 func New() {
+	newNPC := rpg.NewNPC("Ded")
+	fmt.Println("Created NPC: " + newNPC.Name())
+
 	newPlayer := rpg.NewPlayer("Nova")
 	fmt.Println("Created player: " + newPlayer.Name())
 
