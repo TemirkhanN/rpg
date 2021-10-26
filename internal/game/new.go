@@ -19,4 +19,6 @@ func New() {
 	fmt.Println(newPlayer.Name() + " is currently in " + newPlayer.Whereabouts().Name())
 	newPlayer.MoveToLocation(Gludio)
 	fmt.Println(newPlayer.Name() + " teleported to " + newPlayer.Whereabouts().Name())
+
+	fmt.Println(newPlayer.StartConversation(newNPC))
 }

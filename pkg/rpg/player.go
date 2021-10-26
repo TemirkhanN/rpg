@@ -23,3 +23,7 @@ func (p Player) Whereabouts() Location {
 func (p *Player) MoveToLocation(location Location) {
 	p.whereabouts = location
 }
+
+func (p Player) StartConversation(npc NPC) string {
+	return "Hello " + p.Name() + " I am " + npc.Name()
+}
