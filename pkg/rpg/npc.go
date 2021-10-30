@@ -4,9 +4,9 @@ type NPC struct {
 	name string
 }
 
-func NewNPC(NPCName string) NPC {
+func NewNPC(name string) NPC {
 	return NPC{
-		name: NPCName,
+		name: name,
 	}
 }
 

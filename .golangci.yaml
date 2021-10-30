@@ -61,6 +61,8 @@ linters-settings:
     # This rule is extremely volatile. It prevents any logical assign before call
     allow-cuddle-declarations: true
   goimports:
-    local-prefixes: github.com/TemirkhanN/alchemist
+    local-prefixes: github.com/TemirkhanN/rpg
   funlen:
     lines: 100
+  cyclop:
+    max-complexity: 11
