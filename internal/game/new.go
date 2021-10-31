@@ -34,24 +34,22 @@ func draw(screen tcell.Screen, player *rpg.Player, locations []rpg.Location) {
 
 	width, _ := screen.Size()
 	screenCenter := width / 2
-	drawText(screen, screenCenter-10, 1, textStyle, "RPG maker")
+	newText("RPG maker", screenCenter-10, 1).draw(screen, textStyle)
 
 	newBox(1, 1, 25, 10, "Status").draw(screen, boxStyle)
 
-	drawText(screen, 2, 3, infoTextStyle, "Name: "+player.Name())
-	drawText(screen, 2, 4, infoTextStyle, "Currently at: "+player.Whereabouts().Name())
+	newText("Name: "+player.Name(), 2, 3).draw(screen, infoTextStyle)
+	newText("Currently at: "+player.Whereabouts().Name(), 2, 4).draw(screen, infoTextStyle)
 
 	teleport := newBox(1, 12, 25, 20, "Move to")
 	teleport.draw(screen, boxStyle)
 
 	for i, location := range locations {
-		drawText(
-			screen,
+		newText(
+			fmt.Sprintf("%d.%s", i+1, location.Name()),
 			teleport.leftTop.x+1,
 			teleport.leftTop.y+i+1,
-			infoTextStyle,
-			fmt.Sprintf("%d.%s", i+1, location.Name()),
-		)
+		).draw(screen, infoTextStyle)
 	}
 
 	totalLocationsAmount := len(locations)
@@ -70,7 +68,9 @@ func draw(screen tcell.Screen, player *rpg.Player, locations []rpg.Location) {
 			if (mouseX >= teleport.leftTop.x+1 && mouseX <= teleport.rightBottom.x-1) &&
 				(mouseY >= teleport.leftTop.y+1 && mouseY <= teleport.leftTop.y+totalLocationsAmount) {
 				locationKey := mouseY - teleport.leftTop.y - 1
-				player.MoveToLocation(locations[locationKey])
+				if player.Whereabouts().Name() != locations[locationKey].Name() {
+					player.MoveToLocation(locations[locationKey])
+				}
 			}
 		}
 	}

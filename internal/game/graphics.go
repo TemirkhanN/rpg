@@ -14,9 +14,14 @@ type position struct {
 }
 
 type box struct {
-	title       string
+	title       text
 	leftTop     position
 	rightBottom position
+}
+
+type text struct {
+	text     string
+	position position
 }
 
 func newBox(x1 int, y1 int, x2 int, y2 int, title ...string) box {
@@ -28,9 +33,16 @@ func newBox(x1 int, y1 int, x2 int, y2 int, title ...string) box {
 		x1, x2 = x2, x1
 	}
 
-	var boxTitle string
+	boxTitle := newText("", 0, 0)
 	if len(title) == 1 {
-		boxTitle = title[0]
+		titleLen := len(title[0])
+		titleStartAt := (x2-x1-titleLen)/2 + x1
+
+		if titleStartAt < x1 {
+			titleStartAt = x1
+		}
+
+		boxTitle = newText(title[0], titleStartAt, y1)
 	}
 
 	return box{
@@ -42,6 +54,16 @@ func newBox(x1 int, y1 int, x2 int, y2 int, title ...string) box {
 		rightBottom: position{
 			x: x2,
 			y: y2,
+		},
+	}
+}
+
+func newText(value string, posX int, posY int) text {
+	return text{
+		text: value,
+		position: position{
+			x: posX,
+			y: posY,
 		},
 	}
 }
@@ -68,8 +90,9 @@ func createScreen() tcell.Screen {
 	return screen
 }
 
-func drawText(s tcell.Screen, x int, y int, style tcell.Style, str string) {
-	for _, c := range str {
+func (t text) draw(on tcell.Screen, style tcell.Style) {
+	horizontalOffset := t.position.x
+	for _, c := range t.text {
 		var comb []rune
 
 		w := runewidth.RuneWidth(c)
@@ -79,52 +102,43 @@ func drawText(s tcell.Screen, x int, y int, style tcell.Style, str string) {
 			w = 1
 		}
 
-		s.SetContent(x, y, c, comb, style)
-		x += w
+		on.SetContent(horizontalOffset, t.position.y, c, comb, style)
+		horizontalOffset += w
 	}
 }
 
-func (b box) draw(s tcell.Screen, style tcell.Style) {
+func (b box) draw(on tcell.Screen, style tcell.Style) {
 	x1 := b.leftTop.x
 	x2 := b.rightBottom.x
 	y1 := b.leftTop.y
 	y2 := b.rightBottom.y
 
-	var titleStartAt int
-	var titleEndAt int
-
-	if b.title != "" {
-		titleLen := len(b.title)
-		titleStartAt = (x2-x1-titleLen)/2 + x1
-		titleEndAt = titleStartAt + titleLen
-
-		if titleStartAt < x1 {
-			titleStartAt = x1
-		}
-
-		drawText(s, titleStartAt, y1, textStyle, b.title)
+	hasTitle := false
+	titleStartAt := b.title.position.x
+	titleEndAt := titleStartAt + len(b.title.text) - 1
+	if b.title.text != "" {
+		hasTitle = true
+		b.title.draw(on, textStyle)
 	}
 
-	hasTitle := titleStartAt != 0 && titleEndAt != 0
-
 	for col := x1; col <= x2; col++ {
-		if !hasTitle || col < titleStartAt || col > titleEndAt {
-			s.SetContent(col, y1, tcell.RuneHLine, nil, style)
+		if !hasTitle || col < titleStartAt-1 || col > titleEndAt+1 {
+			on.SetContent(col, y1, tcell.RuneHLine, nil, style)
 		}
 
-		s.SetContent(col, y2, tcell.RuneHLine, nil, style)
+		on.SetContent(col, y2, tcell.RuneHLine, nil, style)
 	}
 
 	for row := y1 + 1; row < y2; row++ {
-		s.SetContent(x1, row, tcell.RuneVLine, nil, style)
-		s.SetContent(x2, row, tcell.RuneVLine, nil, style)
+		on.SetContent(x1, row, tcell.RuneVLine, nil, style)
+		on.SetContent(x2, row, tcell.RuneVLine, nil, style)
 	}
 
 	if y1 != y2 && x1 != x2 {
-		s.SetContent(x1, y1, tcell.RuneULCorner, nil, style)
-		s.SetContent(x2, y1, tcell.RuneURCorner, nil, style)
-		s.SetContent(x1, y2, tcell.RuneLLCorner, nil, style)
-		s.SetContent(x2, y2, tcell.RuneLRCorner, nil, style)
+		on.SetContent(x1, y1, tcell.RuneULCorner, nil, style)
+		on.SetContent(x2, y1, tcell.RuneURCorner, nil, style)
+		on.SetContent(x1, y2, tcell.RuneLLCorner, nil, style)
+		on.SetContent(x2, y2, tcell.RuneLRCorner, nil, style)
 	}
 }
 
