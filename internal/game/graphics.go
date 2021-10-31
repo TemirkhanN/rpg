@@ -14,7 +14,7 @@ type position struct {
 }
 
 type box struct {
-	title       text
+	title       *text
 	leftTop     position
 	rightBottom position
 }
@@ -24,7 +24,7 @@ type text struct {
 	position position
 }
 
-func newBox(x1 int, y1 int, x2 int, y2 int, title ...string) box {
+func newBox(x1 int, y1 int, x2 int, y2 int, title ...string) *box {
 	if y2 < y1 {
 		y1, y2 = y2, y1
 	}
@@ -45,7 +45,7 @@ func newBox(x1 int, y1 int, x2 int, y2 int, title ...string) box {
 		boxTitle = newText(title[0], titleStartAt, y1)
 	}
 
-	return box{
+	return &box{
 		title: boxTitle,
 		leftTop: position{
 			x: x1,
@@ -58,8 +58,8 @@ func newBox(x1 int, y1 int, x2 int, y2 int, title ...string) box {
 	}
 }
 
-func newText(value string, posX int, posY int) text {
-	return text{
+func newText(value string, posX int, posY int) *text {
+	return &text{
 		text: value,
 		position: position{
 			x: posX,
