@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/gdamore/tcell"
 
@@ -92,7 +93,7 @@ func (pw primaryWindow) handleEvents() {
 	g := pw.game
 	switch ev := g.screen.PollEvent().(type) {
 	case *tcell.EventKey:
-		pw.handleControlsInput(ev.Key())
+		pw.handleControlsInput(*ev)
 	case *tcell.EventMouse:
 		// left click
 		if ev.Buttons() == tcell.Button1 {
@@ -106,36 +107,67 @@ func (pw primaryWindow) handleEvents() {
 	}
 }
 
-func (pw primaryWindow) handleControlsInput(input tcell.Key) {
-	g := pw.game
-
-	if input == tcell.KeyEscape {
-		g.screen.Fini()
+func (pw primaryWindow) handleControlsInput(input tcell.EventKey) {
+	key := input.Key()
+	// Close game.
+	if key == tcell.KeyEscape {
+		pw.game.screen.Fini()
 		os.Exit(0)
 	}
 
-	if input == tcell.KeyUp {
+	pw.handleDialogueReply(input)
+	pw.handleMovement(key)
+}
+
+func (pw primaryWindow) handleDialogueReply(input tcell.EventKey) {
+	g := pw.game
+
+	currentDialogue := g.player.currentDialogue
+	if currentDialogue.Empty() {
+		return
+	}
+
+	availableReplies := currentDialogue.Choices()
+	if len(availableReplies) == 0 {
+		return
+	}
+
+	choice, err := strconv.Atoi(string(input.Rune()))
+	if err != nil || choice < 0 || len(availableReplies) < choice {
+		return
+	}
+
+	dialogue := pw.game.player.player.Reply(pw.game.player.currentDialogueWith, availableReplies[choice-1])
+	if dialogue.Text() != g.player.currentDialogue.Text() {
+		g.player.currentDialogue = dialogue
+		pw.draw()
+	}
+}
+
+func (pw primaryWindow) handleMovement(key tcell.Key) {
+	g := pw.game
+	if key == tcell.KeyUp {
 		newPosition := g.player.pos
 		newPosition.y--
 
 		pw.playerMoveTo(newPosition)
 	}
 
-	if input == tcell.KeyDown {
+	if key == tcell.KeyDown {
 		newPosition := g.player.pos
 		newPosition.y++
 
 		pw.playerMoveTo(newPosition)
 	}
 
-	if input == tcell.KeyLeft {
+	if key == tcell.KeyLeft {
 		newPosition := g.player.pos
 		newPosition.x--
 
 		pw.playerMoveTo(newPosition)
 	}
 
-	if input == tcell.KeyRight {
+	if key == tcell.KeyRight {
 		newPosition := g.player.pos
 		newPosition.x++
 
@@ -158,6 +190,7 @@ func (pw primaryWindow) playerMoveTo(to position) {
 				break
 			}
 			g.player.currentDialogue = dialogue
+			g.player.currentDialogueWith = npc.npc
 			pw.draw()
 
 			break
@@ -166,6 +199,7 @@ func (pw primaryWindow) playerMoveTo(to position) {
 
 	if !isInDialogue && !g.player.currentDialogue.Empty() {
 		g.player.currentDialogue = rpg.NoDialogue
+		g.player.currentDialogueWith = rpg.NoNpc
 	}
 
 	if movementAllowed {

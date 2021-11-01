@@ -30,9 +30,10 @@ func New(playerName string) *Game {
 			symbol: '🐶',
 			style:  playerStyle,
 		},
-		currentDialogue: rpg.NoDialogue,
-		player:          &newPlayer,
-		pos:             position{x: 30, y: 15},
+		currentDialogue:     rpg.NoDialogue,
+		currentDialogueWith: rpg.NoNpc,
+		player:              &newPlayer,
+		pos:                 position{x: 30, y: 15},
 	}
 
 	newGame.screen = createScreen()

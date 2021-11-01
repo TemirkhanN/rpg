@@ -15,3 +15,5 @@ func NewNPC(name string, dialogues map[string]Dialogue) NPC {
 func (n NPC) Name() string {
 	return n.name
 }
+
+var NoNpc = NewNPC("", nil)

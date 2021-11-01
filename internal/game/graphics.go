@@ -72,10 +72,11 @@ func (n npc) collides(with position) bool {
 }
 
 type player struct {
-	asci            asci
-	player          *rpg.Player
-	pos             position
-	currentDialogue rpg.Dialogue
+	asci                asci
+	player              *rpg.Player
+	pos                 position
+	currentDialogue     rpg.Dialogue
+	currentDialogueWith rpg.NPC
 }
 
 type asci struct {
