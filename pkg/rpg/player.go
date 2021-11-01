@@ -31,7 +31,3 @@ func (p Player) StartConversation(npc NPC) Dialogue {
 func (p Player) Reply(npc NPC, choice string) Dialogue {
 	return npc.dialogues[choice]
 }
-
-// Player Choose one of the replies = reply
-// Player receive reponse from NPC
-// Choose one of the replies and start the process again until there is 0 replies
