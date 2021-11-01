@@ -5,10 +5,10 @@ type Player struct {
 	whereabouts Location
 }
 
-func NewPlayer(playerName string) Player {
+func NewPlayer(playerName string, location Location) Player {
 	return Player{
 		name:        playerName,
-		whereabouts: NewLocation("Unknown location"),
+		whereabouts: location,
 	}
 }
 

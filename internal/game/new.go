@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"os"
 	"unicode/utf8"
 
@@ -11,16 +10,17 @@ import (
 )
 
 type Game struct {
-	player    *player
-	locations []rpg.Location
-	npcs      []*npc
+	player   *player
+	npcs     []*npc
+	teleport teleport
 
 	screen tcell.Screen
 }
 
 func New(playerName string) *Game {
 	newGame := new(Game)
-	newPlayer := rpg.NewPlayer(playerName)
+	newbieTown := rpg.NewLocation("Neu Beetown")
+	newPlayer := rpg.NewPlayer(playerName, newbieTown)
 	newGame.player = &player{
 		asci: asci{
 			symbol: '🐶',
@@ -31,11 +31,15 @@ func New(playerName string) *Game {
 		pos:             position{x: 30, y: 15},
 	}
 
-	newGame.locations = []rpg.Location{
-		rpg.NewLocation("Gludio"),
-		rpg.NewLocation("Dion"),
-		rpg.NewLocation("Goddard"),
-	}
+	newGame.teleport = newTeleport(
+		[]rpg.Location{
+			newbieTown,
+			rpg.NewLocation("Gludio"),
+			rpg.NewLocation("Dion"),
+			rpg.NewLocation("Goddard"),
+		},
+		*newBox(1, 12, 25, 20, "Move to"),
+	)
 
 	newGame.npcs = []*npc{
 		{
@@ -74,13 +78,10 @@ func (g Game) drawGraphics() {
 	// Status panel.
 	newBox(1, 1, 25, 10, "Status").draw(g.screen, boxStyle)
 	newText("Name: "+g.player.player.Name(), 2, 3).draw(g.screen, infoTextStyle)
-	newText("Currently at: "+g.player.player.Whereabouts().Name(), 2, 4).draw(g.screen, infoTextStyle)
+	newText("Location: "+g.player.player.Whereabouts().Name(), 2, 4).draw(g.screen, infoTextStyle)
 
 	// Teleport panel.
-	newBox(1, 12, 25, 20, "Move to").draw(g.screen, boxStyle)
-	for i, location := range g.locations {
-		newText(fmt.Sprintf("%d.%s", i+1, location.Name()), 1+1, 12+1+i).draw(g.screen, infoTextStyle)
-	}
+	g.teleport.draw(g.screen, boxStyle, infoTextStyle)
 
 	// Draw npcs.
 	for _, gameNpc := range g.npcs {
@@ -126,15 +127,9 @@ func (g Game) handleEvents() {
 			mouseX, mouseY := ev.Position()
 
 			// Handle click on teleport panel.
-			if (mouseX >= 1+1 && mouseX <= 25-1) &&
-				(mouseY >= 12+1 && mouseY <= 12+len(g.locations)) {
-				locationKey := mouseY - 12 - 1
-				if g.player.player.Whereabouts().Name() != g.locations[locationKey].Name() {
-					g.player.player.MoveToLocation(g.locations[locationKey])
+			g.teleport.click(g.player.player, position{x: mouseX, y: mouseY})
 
-					g.drawGraphics()
-				}
-			}
+			g.drawGraphics()
 		}
 	}
 }

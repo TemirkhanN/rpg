@@ -10,6 +10,47 @@ import (
 	"github.com/TemirkhanN/rpg/pkg/rpg"
 )
 
+type teleport struct {
+	locations []rpg.Location
+	panel     box
+}
+
+func newTeleport(locations []rpg.Location, panel box) teleport {
+	return teleport{
+		locations: locations,
+		panel:     panel,
+	}
+}
+
+func (t teleport) click(player *rpg.Player, pos position) {
+	leftTop := t.panel.leftTop
+	for i, location := range t.locations {
+		optionPos := position{leftTop.x + 1, leftTop.y + i + 1}
+		// if option is not on the same line or text is not within clicked position.
+		if pos.y != optionPos.y ||
+			pos.x < optionPos.x ||
+			pos.x > optionPos.x+calculateTextWidth(location.Name()) {
+			continue
+		}
+
+		if player.Whereabouts().Name() != location.Name() {
+			player.MoveToLocation(location)
+		}
+
+		break
+	}
+}
+
+func (t teleport) draw(on tcell.Screen, panelStyle tcell.Style, optionsStyle tcell.Style) {
+	t.panel.draw(on, panelStyle)
+
+	leftTop := t.panel.leftTop
+	for i, location := range t.locations {
+		optionPos := position{leftTop.x + 1, leftTop.y + i + 1}
+		newText(fmt.Sprintf("* %s", location.Name()), optionPos.x, optionPos.y).draw(on, optionsStyle)
+	}
+}
+
 type npc struct {
 	asci asci
 	npc  rpg.NPC
@@ -55,6 +96,15 @@ type box struct {
 type text struct {
 	text     string
 	position position
+}
+
+func calculateTextWidth(text string) int {
+	width := 0
+	for _, c := range text {
+		width += runewidth.RuneWidth(c)
+	}
+
+	return width
 }
 
 func newBox(x1 int, y1 int, x2 int, y2 int, title ...string) *box {
