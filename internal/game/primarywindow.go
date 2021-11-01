@@ -1,8 +1,8 @@
 package game
 
 import (
+	"fmt"
 	"os"
-	"unicode/utf8"
 
 	"github.com/gdamore/tcell"
 
@@ -42,7 +42,7 @@ func newPrimaryWindow(game Game) primaryWindow {
 			{
 				asci: asci{style: friendlyNPCStyle, symbol: '🧔'},
 				npc: rpg.NewNPC("Newbie Helper", map[string]rpg.Dialogue{
-					"defaultDialogue": rpg.NewDialogue("I can help you",
+					"defaultDialogue": rpg.NewDialogue("Hello, adventurer. Welcome to our town!",
 						[]string{
 							"Do you need help?",
 						}),
@@ -81,25 +81,20 @@ func (pw primaryWindow) draw() {
 	newText(string(g.player.asci.symbol), g.player.pos.x, g.player.pos.y).draw(g.screen, g.player.asci.style)
 
 	// Draw player dialogue panel.
-	if g.player.currentDialogue != "" {
+	if !g.player.currentDialogue.Empty() {
 		newBox(80, 12, 110, 20, "Dialogue").draw(g.screen, boxStyle)
-		verticalOffset := 13
-
+		at := position{x: 80 + 2, y: 12 + 1}
 		charactersPerLine := 110 - 80 - 4
-		dialogueLength := utf8.RuneCountInString(g.player.currentDialogue)
-		if dialogueLength <= charactersPerLine {
-			newText(g.player.currentDialogue, 82, verticalOffset).draw(g.screen, textStyle)
-		} else {
-			var linedString string
-			for i, r := range g.player.currentDialogue {
-				linedString += string(r)
 
-				if (i+1)%charactersPerLine == 0 || i+1 == dialogueLength {
-					newText(linedString, 82, verticalOffset).draw(g.screen, textStyle)
-					verticalOffset++
-					linedString = ""
-				}
-			}
+		textEndsAt := drawTextWithAutoLinebreaks(g.screen, g.player.currentDialogue.Text(), at, charactersPerLine)
+
+		for i, reply := range g.player.currentDialogue.Choices() {
+			textEndsAt = drawTextWithAutoLinebreaks(
+				g.screen,
+				fmt.Sprintf("%d.%s", i+1, reply),
+				textEndsAt,
+				charactersPerLine,
+			)
 		}
 	}
 
@@ -169,18 +164,21 @@ func (pw primaryWindow) playerMoveTo(to position) {
 
 	for _, npc := range pw.npcs {
 		if npc.collides(to) {
-			dialogue := g.player.player.StartConversation(npc.npc)
-			g.player.currentDialogue = dialogue.Text()
 			movementAllowed = false
 			isInDialogue = true
+			dialogue := g.player.player.StartConversation(npc.npc)
+			if dialogue.Text() == g.player.currentDialogue.Text() {
+				break
+			}
+			g.player.currentDialogue = dialogue
 			pw.draw()
 
 			break
 		}
 	}
 
-	if !isInDialogue && g.player.currentDialogue != "" {
-		g.player.currentDialogue = ""
+	if !isInDialogue && !g.player.currentDialogue.Empty() {
+		g.player.currentDialogue = rpg.NoDialogue
 	}
 
 	if movementAllowed {

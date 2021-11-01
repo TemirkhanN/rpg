@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"os"
+	"unicode/utf8"
 
 	"github.com/gdamore/tcell"
 	"github.com/mattn/go-runewidth"
@@ -74,7 +75,7 @@ type player struct {
 	asci            asci
 	player          *rpg.Player
 	pos             position
-	currentDialogue string
+	currentDialogue rpg.Dialogue
 }
 
 type asci struct {
@@ -223,6 +224,28 @@ func (b box) draw(on tcell.Screen, style tcell.Style) {
 		on.SetContent(x1, y2, tcell.RuneLLCorner, nil, style)
 		on.SetContent(x2, y2, tcell.RuneLRCorner, nil, style)
 	}
+}
+
+func drawTextWithAutoLinebreaks(on tcell.Screen, text string, at position, charactersPerLine int) position {
+	verticalOffset := at.y
+	dialogueLength := utf8.RuneCountInString(text)
+	if dialogueLength <= charactersPerLine {
+		newText(text, 82, verticalOffset).draw(on, textStyle)
+		verticalOffset++
+	} else {
+		var linedString string
+		for i, r := range text {
+			linedString += string(r)
+
+			if (i+1)%charactersPerLine == 0 || i+1 == dialogueLength {
+				newText(linedString, 82, verticalOffset).draw(on, textStyle)
+				verticalOffset++
+				linedString = ""
+			}
+		}
+	}
+
+	return position{x: at.x, y: verticalOffset}
 }
 
 var (

@@ -27,7 +27,7 @@ func New(playerName string) *Game {
 			symbol: '🐶',
 			style:  playerStyle,
 		},
-		currentDialogue: "",
+		currentDialogue: rpg.NoDialogue,
 		player:          &newPlayer,
 		pos:             position{x: 30, y: 15},
 	}

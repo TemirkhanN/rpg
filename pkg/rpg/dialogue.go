@@ -19,3 +19,9 @@ func (d Dialogue) Text() string {
 func (d Dialogue) Choices() []string {
 	return d.choices
 }
+
+func (d Dialogue) Empty() bool {
+	return d.Text() == ""
+}
+
+var NoDialogue = NewDialogue("", nil)
