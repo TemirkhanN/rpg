@@ -194,15 +194,22 @@ func (g Game) handleControlsInput(input tcell.Key) {
 
 func (g Game) playerMoveTo(to position) {
 	movementAllowed := true
+	isInDialogue := false
+
 	for _, npc := range g.npcs {
 		if npc.pos == to {
 			dialogue := g.player.player.StartConversation(npc.npc)
 			g.player.currentDialogue = dialogue
 			movementAllowed = false
+			isInDialogue = true
 			g.drawGraphics()
 
 			break
 		}
+	}
+
+	if !isInDialogue && g.player.currentDialogue != "" {
+		g.player.currentDialogue = ""
 	}
 
 	if movementAllowed {
