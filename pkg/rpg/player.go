@@ -24,6 +24,14 @@ func (p *Player) MoveToLocation(location Location) {
 	p.whereabouts = location
 }
 
-func (p Player) StartConversation(npc NPC) string {
-	return "Hello " + p.Name() + " I am " + npc.Name()
+func (p Player) StartConversation(npc NPC) Dialogue {
+	return npc.dialogues["defaultDialogue"]
 }
+
+func (p Player) Reply(npc NPC, choice string) Dialogue {
+	return npc.dialogues[choice]
+}
+
+// Player Choose one of the replies = reply
+// Player receive reponse from NPC
+// Choose one of the replies and start the process again until there is 0 replies

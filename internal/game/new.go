@@ -41,15 +41,29 @@ func New(playerName string) *Game {
 		*newBox(1, 12, 25, 20, "Move to"),
 	)
 
+	dedNPC := rpg.NewNPC("Ded", map[string]rpg.Dialogue{
+		"defaultDialogue": rpg.NewDialogue("What's your profession?",
+			[]string{
+				"I'm a warrior",
+				"I'm a mage",
+			}),
+	})
+
+	newbieHelper := rpg.NewNPC("Newbie Helper", map[string]rpg.Dialogue{
+		"defaultDialogue": rpg.NewDialogue("I can help you",
+			[]string{
+				"Do you need help?",
+			}),
+	})
 	newGame.npcs = []*npc{
 		{
 			asci: asci{style: friendlyNPCStyle, symbol: '👱'},
-			npc:  rpg.NewNPC("Newbie helper"),
+			npc:  newbieHelper,
 			pos:  position{x: 40, y: 8},
 		},
 		{
 			asci: asci{style: friendlyNPCStyle, symbol: '🧔'},
-			npc:  rpg.NewNPC("Ded"),
+			npc:  dedNPC,
 			pos:  position{x: 55, y: 13},
 		},
 	}
@@ -176,7 +190,7 @@ func (g Game) playerMoveTo(to position) {
 	for _, npc := range g.npcs {
 		if npc.collides(to) {
 			dialogue := g.player.player.StartConversation(npc.npc)
-			g.player.currentDialogue = dialogue
+			g.player.currentDialogue = dialogue.Text()
 			movementAllowed = false
 			isInDialogue = true
 			g.drawGraphics()

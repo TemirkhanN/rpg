@@ -1,12 +1,14 @@
 package rpg
 
 type NPC struct {
-	name string
+	name      string
+	dialogues map[string]Dialogue
 }
 
-func NewNPC(name string) NPC {
+func NewNPC(name string, dialogues map[string]Dialogue) NPC {
 	return NPC{
-		name: name,
+		name:      name,
+		dialogues: dialogues,
 	}
 }
 
