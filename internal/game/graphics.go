@@ -16,6 +16,19 @@ type npc struct {
 	pos  position
 }
 
+func (n npc) collides(with position) bool {
+	if with.y != n.pos.y {
+		return false
+	}
+
+	// npc takes 3 slots on horizontal line
+	if with.x < n.pos.x-1 || with.x > n.pos.x+1 {
+		return false
+	}
+
+	return true
+}
+
 type player struct {
 	asci            asci
 	player          *rpg.Player

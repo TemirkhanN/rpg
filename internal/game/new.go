@@ -179,7 +179,7 @@ func (g Game) playerMoveTo(to position) {
 	isInDialogue := false
 
 	for _, npc := range g.npcs {
-		if npc.pos == to {
+		if npc.collides(to) {
 			dialogue := g.player.player.StartConversation(npc.npc)
 			g.player.currentDialogue = dialogue
 			movementAllowed = false
