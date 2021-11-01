@@ -18,24 +18,6 @@ type Game struct {
 	screen tcell.Screen
 }
 
-type npc struct {
-	asci asci
-	npc  rpg.NPC
-	pos  position
-}
-
-type player struct {
-	asci            asci
-	player          *rpg.Player
-	pos             position
-	currentDialogue string
-}
-
-type asci struct {
-	symbol rune
-	style  tcell.Style
-}
-
 func New(playerName string) *Game {
 	newGame := new(Game)
 	newPlayer := rpg.NewPlayer(playerName)
@@ -217,8 +199,3 @@ func (g Game) playerMoveTo(to position) {
 		g.drawGraphics()
 	}
 }
-
-var (
-	friendlyNPCStyle = tcell.StyleDefault.Background(tcell.ColorWhite).Foreground(tcell.ColorGreen).Bold(true)
-	playerStyle      = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorGoldenrod).Bold(true)
-)

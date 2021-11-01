@@ -6,7 +6,27 @@ import (
 
 	"github.com/gdamore/tcell"
 	"github.com/mattn/go-runewidth"
+
+	"github.com/TemirkhanN/rpg/pkg/rpg"
 )
+
+type npc struct {
+	asci asci
+	npc  rpg.NPC
+	pos  position
+}
+
+type player struct {
+	asci            asci
+	player          *rpg.Player
+	pos             position
+	currentDialogue string
+}
+
+type asci struct {
+	symbol rune
+	style  tcell.Style
+}
 
 type position struct {
 	x int
@@ -143,7 +163,9 @@ func (b box) draw(on tcell.Screen, style tcell.Style) {
 }
 
 var (
-	textStyle     = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
-	infoTextStyle = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorCadetBlue)
-	boxStyle      = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+	textStyle        = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+	infoTextStyle    = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorCadetBlue)
+	boxStyle         = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+	friendlyNPCStyle = tcell.StyleDefault.Background(tcell.ColorWhite).Foreground(tcell.ColorGreen).Bold(true)
+	playerStyle      = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorGoldenrod).Bold(true)
 )
