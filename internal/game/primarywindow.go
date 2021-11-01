@@ -16,38 +16,25 @@ type primaryWindow struct {
 }
 
 func newPrimaryWindow(game Game) primaryWindow {
+	newbieHelper, _ := game.resources.GetNPC("Newbie Helper")
+	guard, _ := game.resources.GetNPC("Guard")
+
 	return primaryWindow{
 		game: game,
 		teleport: newTeleport(
-			[]rpg.Location{
-				game.player.player.Whereabouts(),
-				rpg.NewLocation("Gludio"),
-				rpg.NewLocation("Dion"),
-				rpg.NewLocation("Goddard"),
-			},
+			game.resources.Locations(),
 			*newBox(1, 12, 25, 20, "Move to"),
 		),
 		npcs: []*npc{
 			{
 				asci: asci{style: friendlyNPCStyle, symbol: '👱'},
-				npc: rpg.NewNPC("Ded", map[string]rpg.Dialogue{
-					"defaultDialogue": rpg.NewDialogue("What's your profession?",
-						[]string{
-							"I'm a warrior",
-							"I'm a mage",
-						}),
-				}),
-				pos: position{x: 40, y: 8},
+				npc:  newbieHelper,
+				pos:  position{x: 40, y: 8},
 			},
 			{
 				asci: asci{style: friendlyNPCStyle, symbol: '🧔'},
-				npc: rpg.NewNPC("Newbie Helper", map[string]rpg.Dialogue{
-					"defaultDialogue": rpg.NewDialogue("Hello, adventurer. Welcome to our town!",
-						[]string{
-							"Do you need help?",
-						}),
-				}),
-				pos: position{x: 55, y: 13},
+				npc:  guard,
+				pos:  position{x: 55, y: 13},
 			},
 		},
 	}

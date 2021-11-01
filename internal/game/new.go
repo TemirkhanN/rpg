@@ -3,6 +3,7 @@ package game
 import (
 	"github.com/gdamore/tcell"
 
+	"github.com/TemirkhanN/rpg/internal/game/resources"
 	"github.com/TemirkhanN/rpg/pkg/rpg"
 )
 
@@ -12,7 +13,8 @@ type window interface {
 }
 
 type Game struct {
-	player *player
+	player    *player
+	resources resources.Resources
 
 	screen       tcell.Screen
 	activeWindow window
@@ -20,7 +22,8 @@ type Game struct {
 
 func New(playerName string) *Game {
 	newGame := new(Game)
-	newbieTown := rpg.NewLocation("Neu Beetown")
+	newGame.resources = resources.LoadResources()
+	newbieTown, _ := newGame.resources.GetLocation("Talking Island")
 	newPlayer := rpg.NewPlayer(playerName, newbieTown)
 	newGame.player = &player{
 		asci: asci{

@@ -1,0 +1,7 @@
+defaultDialogue:
+  text: "Hello, Adventurer! Happy to see you around. Feel free to ask questions"
+  replies:
+    - "Tell me about this game"
+    - "This is all I needed to know"
+Tell me about this game:
+  text: "Well, this is a game definition I have not filled yet. Sorry :)"
