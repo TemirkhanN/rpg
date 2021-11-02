@@ -4,20 +4,21 @@ import (
 	"github.com/gdamore/tcell"
 
 	"github.com/TemirkhanN/rpg/internal/game/resources"
+	"github.com/TemirkhanN/rpg/internal/game/scenes"
+	"github.com/TemirkhanN/rpg/internal/game/ui"
 	"github.com/TemirkhanN/rpg/pkg/rpg"
 )
 
-type window interface {
-	draw()
-	handleEvents()
-}
-
 type Game struct {
-	player    *player
+	player    *rpg.Player
 	resources resources.Resources
 
-	screen       tcell.Screen
-	activeWindow window
+	screen      tcell.Screen
+	activeScene scenes.Scene
+}
+
+func (g Game) Screen() tcell.Screen {
+	return g.screen
 }
 
 func New(playerName string) *Game {
@@ -25,28 +26,19 @@ func New(playerName string) *Game {
 	newGame.resources = resources.LoadResources()
 	newbieTown, _ := newGame.resources.GetLocation("Talking Island")
 	newPlayer := rpg.NewPlayer(playerName, newbieTown)
-	newGame.player = &player{
-		asci: asci{
-			symbol: '🐶',
-			style:  playerStyle,
-		},
-		currentDialogue:     rpg.NoDialogue,
-		currentDialogueWith: rpg.NoNpc,
-		player:              &newPlayer,
-		pos:                 position{x: 30, y: 15},
-	}
+	newGame.player = &newPlayer
 
-	newGame.screen = createScreen()
+	newGame.screen = ui.CreateScreen()
 	newGame.screen.EnableMouse()
 
-	newGame.activeWindow = newPrimaryWindow(*newGame)
+	newGame.activeScene = scenes.NewMainScene(newGame.resources, newGame.player)
 
 	return newGame
 }
 
 func (g *Game) Start() {
-	g.activeWindow.draw()
+	g.activeScene.Draw(g.screen)
 	for {
-		g.activeWindow.handleEvents()
+		g.activeScene.HandleEvents(g.screen)
 	}
 }
