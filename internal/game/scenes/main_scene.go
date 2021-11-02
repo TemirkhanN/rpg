@@ -19,6 +19,7 @@ type MainScene struct {
 	teleport ui.Teleport
 	npcs     []ui.NPC
 	player   *ui.Player
+	area     ui.Area
 }
 
 func NewMainScene(resources resources.Resources, player *rpg.Player) MainScene {
@@ -30,24 +31,19 @@ func NewMainScene(resources resources.Resources, player *rpg.Player) MainScene {
 	return MainScene{
 		teleport: ui.NewTeleport(
 			resources.Locations(),
-			*ui.NewBox(1, 12, 25, 20, "Move to"),
+			ui.NewBox(1, 12, 25, 20, "Move to"),
 		),
 		player: &playerUI,
 		npcs: []ui.NPC{
 			ui.NewNPC(&newbieHelper, ui.Position{X: 40, Y: 8}, '👱', ui.FriendlyNPCStyle),
 			ui.NewNPC(&guard, ui.Position{X: 55, Y: 13}, '🧔', ui.FriendlyNPCStyle),
 		},
+		area: ui.NewArea(26, 1, 79, 20, ui.BoxStyle),
 	}
 }
 
 func (ms MainScene) Draw(on tcell.Screen) {
 	on.Clear()
-
-	width, _ := on.Size()
-	screenCenter := width / 2
-
-	// Game title.
-	ui.NewText("RPG maker", screenCenter-10, 1).Draw(on, ui.InfoTextStyle)
 
 	// Status panel.
 	ui.NewBox(1, 1, 25, 10, "Status").Draw(on)
@@ -67,6 +63,8 @@ func (ms MainScene) Draw(on tcell.Screen) {
 
 	// Draw player dialogue panel.
 	ms.player.DrawDialogue(on, ui.Position{X: 80, Y: 1})
+
+	ms.area.Draw(on)
 
 	on.Show()
 }
@@ -135,6 +133,10 @@ func (ms MainScene) handleMovement(key tcell.Key) {
 func (ms MainScene) playerMoveTo(to ui.Position) {
 	movementAllowed := true
 	isInDialogue := false
+
+	if !to.Inside(ms.area) {
+		return
+	}
 
 	for _, npc := range ms.npcs {
 		if npc.Collides(to) {

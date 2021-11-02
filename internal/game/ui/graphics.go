@@ -30,6 +30,18 @@ type Text struct {
 	position Position
 }
 
+func (p Position) Inside(a Area) bool {
+	if a.rectangle.leftTop.X >= p.X || a.rectangle.leftTop.Y >= p.Y {
+		return false
+	}
+
+	if a.rectangle.rightBottom.X-1 <= p.X || a.rectangle.rightBottom.Y <= p.Y {
+		return false
+	}
+
+	return true
+}
+
 func CalculateTextWidth(text string) int {
 	width := 0
 	for _, c := range text {
@@ -39,7 +51,7 @@ func CalculateTextWidth(text string) int {
 	return width
 }
 
-func NewBox(x1 int, y1 int, x2 int, y2 int, title ...string) *Box {
+func NewBox(x1 int, y1 int, x2 int, y2 int, title ...string) Box {
 	if y2 < y1 {
 		y1, y2 = y2, y1
 	}
@@ -60,7 +72,7 @@ func NewBox(x1 int, y1 int, x2 int, y2 int, title ...string) *Box {
 		boxTitle = NewText(title[0], titleStartAt, y1)
 	}
 
-	return &Box{
+	return Box{
 		title:       boxTitle,
 		leftTop:     Position{X: x1, Y: y1},
 		rightBottom: Position{X: x2, Y: y2},
