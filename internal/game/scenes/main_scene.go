@@ -66,7 +66,7 @@ func (ms MainScene) Draw(on tcell.Screen) {
 	ms.player.Draw(on)
 
 	// Draw player dialogue panel.
-	ms.player.DrawDialogue(on, ui.Position{X: 80, Y: 12})
+	ms.player.DrawDialogue(on, ui.Position{X: 80, Y: 1})
 
 	on.Show()
 }

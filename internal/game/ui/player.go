@@ -44,7 +44,7 @@ func (p Player) DrawDialogue(on tcell.Screen, at Position) {
 	}
 
 	charactersPerLine := 26
-	NewBox(at.X, at.Y, at.X+charactersPerLine+4, at.Y+8, "Dialogue").Draw(on, BoxStyle)
+	NewBox(at.X, at.Y, at.X+charactersPerLine+4, at.Y+8, p.currentDialogueWith.Name()).Draw(on, BoxStyle)
 	textStartAt := Position{X: at.X + 2, Y: at.Y + 1}
 
 	textEndsAt := DrawTextWithAutoLinebreaks(on, p.currentDialogue.Text(), textStartAt, charactersPerLine)
