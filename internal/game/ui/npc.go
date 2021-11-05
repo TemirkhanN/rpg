@@ -37,4 +37,7 @@ func (n NPC) Collides(with Position) bool {
 	return true
 }
 
-var FriendlyNPCStyle = tcell.StyleDefault.Background(tcell.ColorWhite).Foreground(tcell.ColorGreen).Bold(true)
+var (
+	FriendlyNPCStyle = tcell.StyleDefault.Background(tcell.ColorWhite).Foreground(tcell.ColorGreen).Bold(true)
+	NeutralNPCStyle  = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorGreen).Bold(true)
+)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/TemirkhanN/rpg/internal/game/resources"
 	"github.com/TemirkhanN/rpg/internal/game/ui"
+	"github.com/TemirkhanN/rpg/internal/game/ui/icon"
 	"github.com/TemirkhanN/rpg/pkg/rpg"
 )
 
@@ -24,6 +25,7 @@ type MainScene struct {
 func NewMainScene(resources resources.Resources, player *rpg.Player) MainScene {
 	newbieHelper, _ := resources.GetNPC("Newbie Helper")
 	guard, _ := resources.GetNPC("Guard")
+	cow, _ := resources.GetNPC("Cow")
 
 	playerUI := ui.NewPlayer(player, ui.Position{X: 30, Y: 15}, '🐶', ui.PlayerIconStyle)
 
@@ -32,6 +34,7 @@ func NewMainScene(resources resources.Resources, player *rpg.Player) MainScene {
 		npcs: []ui.NPC{
 			ui.NewNPC(&newbieHelper, ui.Position{X: 40, Y: 8}, '👱', ui.FriendlyNPCStyle),
 			ui.NewNPC(&guard, ui.Position{X: 55, Y: 13}, '🧔', ui.FriendlyNPCStyle),
+			ui.NewNPC(&cow, ui.Position{X: 50, Y: 17}, icon.Cow, ui.NeutralNPCStyle),
 		},
 		area: ui.NewArea(26, 1, 79, 20, ui.BoxStyle),
 	}
