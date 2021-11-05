@@ -16,10 +16,9 @@ type Scene interface {
 }
 
 type MainScene struct {
-	teleport ui.Teleport
-	npcs     []ui.NPC
-	player   *ui.Player
-	area     ui.Area
+	npcs   []ui.NPC
+	player *ui.Player
+	area   ui.Area
 }
 
 func NewMainScene(resources resources.Resources, player *rpg.Player) MainScene {
@@ -29,10 +28,6 @@ func NewMainScene(resources resources.Resources, player *rpg.Player) MainScene {
 	playerUI := ui.NewPlayer(player, ui.Position{X: 30, Y: 15}, '🐶', ui.PlayerIconStyle)
 
 	return MainScene{
-		teleport: ui.NewTeleport(
-			resources.Locations(),
-			ui.NewBox(1, 12, 25, 20, "Move to"),
-		),
 		player: &playerUI,
 		npcs: []ui.NPC{
 			ui.NewNPC(&newbieHelper, ui.Position{X: 40, Y: 8}, '👱', ui.FriendlyNPCStyle),
@@ -49,9 +44,6 @@ func (ms MainScene) Draw(on tcell.Screen) {
 	ui.NewBox(1, 1, 25, 10, "Status").Draw(on)
 	ui.NewText("Name: "+ms.player.Player().Name(), 2, 3).Draw(on, ui.InfoTextStyle)
 	ui.NewText("Location: "+ms.player.Player().Whereabouts().Name(), 2, 4).Draw(on, ui.InfoTextStyle)
-
-	// Teleport panel.
-	ms.teleport.Draw(on, ui.BoxStyle, ui.InfoTextStyle)
 
 	// Draw npcs.
 	for _, gameNpc := range ms.npcs {
@@ -74,15 +66,11 @@ func (ms MainScene) HandleEvents(within tcell.Screen) {
 	case *tcell.EventKey:
 		ms.handleControlsInput(within, *ev)
 	case *tcell.EventMouse:
-		// left click
-		if ev.Buttons() == tcell.Button1 {
-			mouseX, mouseY := ev.Position()
-
-			// Handle click on teleport panel.
-			ms.teleport.Click(ms.player.Player(), ui.Position{X: mouseX, Y: mouseY})
-
-			ms.Draw(within)
-		}
+		/*
+			// left click
+			if ev.Buttons() == tcell.Button1 {
+			}
+		*/
 	}
 }
 
