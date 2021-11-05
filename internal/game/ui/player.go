@@ -44,10 +44,13 @@ func (p Player) DrawDialogue(on tcell.Screen, at Position) {
 	}
 
 	charactersPerLine := 26
-	NewBox(at.X, at.Y, at.X+charactersPerLine+4, at.Y+8, p.currentDialogueWith.Name()).Draw(on, BoxStyle)
 	textStartAt := Position{X: at.X + 2, Y: at.Y + 1}
 
 	textEndsAt := DrawTextWithAutoLinebreaks(on, p.currentDialogue.Text(), textStartAt, charactersPerLine)
+
+	if len(p.currentDialogue.Choices()) != 0 {
+		textEndsAt.Y++
+	}
 
 	for i, reply := range p.currentDialogue.Choices() {
 		textEndsAt = DrawTextWithAutoLinebreaks(
@@ -57,6 +60,8 @@ func (p Player) DrawDialogue(on tcell.Screen, at Position) {
 			charactersPerLine,
 		)
 	}
+
+	NewBox(at.X, at.Y, at.X+charactersPerLine+4, textEndsAt.Y, p.currentDialogueWith.Name()).Draw(on, BoxStyle)
 }
 
 func (p *Player) ChooseDialogueReplyOption(input tcell.EventKey) {
