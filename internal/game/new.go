@@ -37,8 +37,8 @@ func New(playerName string) *Game {
 }
 
 func (g *Game) Start() {
-	g.activeScene.Draw(g.screen)
 	for {
+		g.activeScene.Draw(g.screen)
 		g.activeScene.HandleEvents(g.screen)
 	}
 }

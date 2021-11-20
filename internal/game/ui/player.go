@@ -6,6 +6,7 @@ import (
 
 	"github.com/gdamore/tcell"
 
+	"github.com/TemirkhanN/rpg/internal/game/ui/interactive"
 	"github.com/TemirkhanN/rpg/pkg/rpg"
 )
 
@@ -122,6 +123,14 @@ func (p *Player) MoveTo(pos Position) {
 
 func (p Player) Position() Position {
 	return p.pos
+}
+
+func (p *Player) Teleport(to Position) {
+	p.pos = to
+}
+
+func (p Player) Interact(element interactive.Element) {
+	element.RunAction()
 }
 
 var PlayerIconStyle = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorGoldenrod).Bold(true)

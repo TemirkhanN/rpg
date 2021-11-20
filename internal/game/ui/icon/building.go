@@ -4,4 +4,5 @@ const (
 	Hospital = '🏥'
 	House    = '🏠'
 	Castle   = '🏰'
+	Door     = '🚪'
 )

@@ -7,4 +7,6 @@ const (
 	CowFace    = '🐮'
 	MouseFace  = '🐭'
 	PigFace    = '🐷'
+	ManFace    = '🧔'
+	WomanFace  = '👱'
 )
