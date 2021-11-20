@@ -232,7 +232,7 @@ func (ms MainScene) playerMoveTo(to ui.Position) {
 
 	for _, door := range ms.doors {
 		if door.Collides(to) {
-			door.RunAction()
+			ms.player.Interact(door.Element)
 
 			return
 		}
