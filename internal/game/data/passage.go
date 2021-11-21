@@ -7,19 +7,9 @@ import (
 )
 
 type Passage struct {
-	in   Position
-	out  Position
-	from *Location
-	to   *Location
-}
-
-func NewPassage(in Position, out Position, from *Location, to *Location) Passage {
-	return Passage{
-		from: from,
-		in:   in,
-		to:   to,
-		out:  out,
-	}
+	in  Position
+	out Position
+	to  Location
 }
 
 func (p Passage) Position() Position {

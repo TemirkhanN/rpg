@@ -10,7 +10,7 @@ import (
 
 type Player struct {
 	player   *rpg.Player
-	location *Location
+	location Location
 	position Position
 }
 
@@ -45,7 +45,7 @@ func (p Player) Name() string {
 }
 
 func (p Player) Whereabouts() Location {
-	return *p.location
+	return p.location
 }
 
 func (p *Player) StartDialogue(with Npc) {
@@ -77,16 +77,16 @@ func (p *Player) MoveTo(to Position) {
 
 	currentLocation := p.location
 
-	if !positionInsideLocation(to, *currentLocation) {
-		return
-	}
-
 	for _, passage := range currentLocation.Passages() {
 		if collides(to, passage.in) {
 			p.TeleportToLocation(passage.to, passage.out)
 
 			return
 		}
+	}
+
+	if !positionInsideLocation(to, currentLocation) {
+		return
 	}
 
 	for _, object := range currentLocation.Objects() {
@@ -114,7 +114,7 @@ func (p *Player) Teleport(to Position) {
 	p.position = to
 }
 
-func (p *Player) TeleportToLocation(location *Location, to Position) {
+func (p *Player) TeleportToLocation(location Location, to Position) {
 	p.location = location
 	p.Teleport(to)
 }

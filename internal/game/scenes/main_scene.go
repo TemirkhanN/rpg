@@ -29,8 +29,12 @@ func NewMainScene(resources resources.Resources, player *rpg.Player) *MainScene 
 		res:    resources,
 	}
 
-	location, _ := resources.LoadLocation(1)
-	mainScene.player.TeleportToLocation(&location, data.NewPos(35, 10))
+	location, err := resources.LoadLocation(1)
+	if err != nil {
+		panic(err)
+	}
+
+	mainScene.player.TeleportToLocation(location, data.NewPos(35, 10))
 
 	return mainScene
 }

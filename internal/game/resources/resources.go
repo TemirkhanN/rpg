@@ -12,12 +12,6 @@ import (
 	"github.com/TemirkhanN/rpg/pkg/rpg"
 )
 
-type npc struct {
-	ID   int
-	Name string
-	Icon UnicodeIcon
-}
-
 type UnicodeIcon rune
 
 func (r *UnicodeIcon) UnmarshalYAML(n *yaml.Node) error {
@@ -30,6 +24,12 @@ func (r *UnicodeIcon) UnmarshalYAML(n *yaml.Node) error {
 	*r = UnicodeIcon(rn)
 
 	return nil
+}
+
+type npc struct {
+	ID   int
+	Name string
+	Icon UnicodeIcon
 }
 
 type dialogue struct {
@@ -49,6 +49,11 @@ type location struct {
 		ID       int
 		Position position
 	}
+	Passages []struct {
+		In  position
+		Out position
+		To  int
+	}
 }
 
 //go:embed *
@@ -57,12 +62,14 @@ var resourceDir embed.FS
 type Resources struct {
 	initialized bool
 	npcs        map[int]data.Npc
+	locations   map[int]data.Location
 }
 
 func LoadResources() Resources {
 	res := Resources{
 		initialized: true,
 		npcs:        nil,
+		locations:   make(map[int]data.Location),
 	}
 
 	res.loadNpcs()
@@ -124,6 +131,11 @@ func (r Resources) GetNPC(id int) (data.Npc, error) {
 }
 
 func (r Resources) LoadLocation(id int) (data.Location, error) {
+	loc, exists := r.locations[id]
+	if exists {
+		return loc, nil
+	}
+
 	yamlFile, err := resourceDir.ReadFile("location.yaml")
 	if err != nil {
 		panic(err)
@@ -139,6 +151,32 @@ func (r Resources) LoadLocation(id int) (data.Location, error) {
 
 		loc := data.NewLocation(rpg.NewLocation(locationDetails.ID, locationDetails.Name))
 
+		for _, passageDetails := range locationDetails.Passages {
+			leadsToID := passageDetails.To
+
+			leadsTo := lazyLoadLocation{
+				location: nil,
+				loader: func() data.Location {
+					leadsTo, err := r.LoadLocation(leadsToID)
+					if err != nil {
+						panic(err)
+					}
+
+					return leadsTo
+				},
+			}
+
+			if err != nil {
+				return &data.CommonLocation{}, fmt.Errorf("location %d has passage to unknown location %d", id, leadsToID)
+			}
+
+			loc.AddPassage(
+				data.NewPos(passageDetails.In.X, passageDetails.In.Y),
+				data.NewPos(passageDetails.Out.X, passageDetails.Out.Y),
+				&leadsTo,
+			)
+		}
+
 		for _, npcOnLocation := range locationDetails.Npcs {
 			npc, err := r.GetNPC(npcOnLocation.ID)
 			if err != nil {
@@ -148,8 +186,69 @@ func (r Resources) LoadLocation(id int) (data.Location, error) {
 			loc.Spawn(npc, data.NewPos(npcOnLocation.Position.X, npcOnLocation.Position.Y))
 		}
 
-		return loc, nil
+		r.locations[id] = &loc
+
+		return r.locations[id], nil
 	}
 
-	return data.Location{}, fmt.Errorf("location with id %d does not exist", id)
+	return &data.CommonLocation{}, fmt.Errorf("location with id %d does not exist", id)
+}
+
+type lazyLoadLocation struct {
+	location data.Location
+	loader   func() data.Location
+}
+
+func (ll *lazyLoadLocation) load() {
+	if ll.location == nil {
+		ll.location = ll.loader()
+	}
+}
+
+func (ll *lazyLoadLocation) AddPassage(in data.Position, out data.Position, to data.Location) {
+	ll.load()
+
+	ll.location.AddPassage(in, out, to)
+}
+
+func (ll lazyLoadLocation) LeftTop() data.Position {
+	ll.load()
+
+	return ll.location.LeftTop()
+}
+
+func (ll lazyLoadLocation) RightBottom() data.Position {
+	ll.load()
+
+	return ll.location.RightBottom()
+}
+
+func (ll lazyLoadLocation) Name() string {
+	ll.load()
+
+	return ll.location.Name()
+}
+
+func (ll *lazyLoadLocation) Spawn(npc data.Npc, position data.Position) {
+	ll.load()
+
+	ll.location.Spawn(npc, position)
+}
+
+func (ll lazyLoadLocation) Npcs() []*data.Npc {
+	ll.load()
+
+	return ll.location.Npcs()
+}
+
+func (ll lazyLoadLocation) Objects() []*data.Object {
+	ll.load()
+
+	return ll.location.Objects()
+}
+
+func (ll lazyLoadLocation) Passages() []data.Passage {
+	ll.load()
+
+	return ll.location.Passages()
 }
