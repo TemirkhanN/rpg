@@ -1,6 +1,9 @@
--
+- id: 1
   name: Newbie Helper
--
+  icon: 👱
+- id: 2
   name: Guard
--
+  icon: 🧔
+- id: 3
   name: Cow
+  icon: 🐄

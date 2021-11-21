@@ -24,8 +24,7 @@ func (g Game) Screen() tcell.Screen {
 func New(playerName string) *Game {
 	newGame := new(Game)
 	newGame.resources = resources.LoadResources()
-	newbieTown, _ := newGame.resources.GetLocation("Talking Island")
-	newPlayer := rpg.NewPlayer(playerName, newbieTown)
+	newPlayer := rpg.NewPlayer(playerName)
 	newGame.player = &newPlayer
 
 	newGame.screen = ui.CreateScreen()

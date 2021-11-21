@@ -3,43 +3,48 @@ package ui
 import (
 	"fmt"
 	"os"
-	"unicode/utf8"
 
 	"github.com/gdamore/tcell"
 	"github.com/mattn/go-runewidth"
+
+	"github.com/TemirkhanN/rpg/internal/game/data"
 )
 
-type asci struct {
-	symbol rune
-	style  tcell.Style
+type Drawer interface {
+	Icon() rune
+	Style() tcell.Style
+	Position() data.Position
 }
 
-type Position struct {
-	X int
-	Y int
+type Pos struct {
+	x int
+	y int
+}
+
+func NewPosition(x int, y int) Pos {
+	return Pos{
+		x: x,
+		y: y,
+	}
+}
+
+func (p Pos) X() int {
+	return p.x
+}
+
+func (p Pos) Y() int {
+	return p.y
 }
 
 type Box struct {
 	title       *Text
-	leftTop     Position
-	rightBottom Position
+	leftTop     Pos
+	rightBottom Pos
 }
 
 type Text struct {
 	text     string
-	position Position
-}
-
-func (p Position) Inside(a Area) bool {
-	if a.rectangle.leftTop.X >= p.X || a.rectangle.leftTop.Y >= p.Y {
-		return false
-	}
-
-	if a.rectangle.rightBottom.X-1 <= p.X || a.rectangle.rightBottom.Y <= p.Y {
-		return false
-	}
-
-	return true
+	position Pos
 }
 
 func CalculateTextWidth(text string) int {
@@ -74,15 +79,15 @@ func NewBox(x1 int, y1 int, x2 int, y2 int, title ...string) Box {
 
 	return Box{
 		title:       boxTitle,
-		leftTop:     Position{X: x1, Y: y1},
-		rightBottom: Position{X: x2, Y: y2},
+		leftTop:     Pos{x: x1, y: y1},
+		rightBottom: Pos{x: x2, y: y2},
 	}
 }
 
 func NewText(value string, posX int, posY int) *Text {
 	return &Text{
 		text:     value,
-		position: Position{X: posX, Y: posY},
+		position: Pos{x: posX, y: posY},
 	}
 }
 
@@ -114,7 +119,7 @@ func (t Text) Draw(on tcell.Screen, useStyle ...tcell.Style) {
 		style = useStyle[0]
 	}
 
-	horizontalOffset := t.position.X
+	horizontalOffset := t.position.X()
 	for _, c := range t.text {
 		var comb []rune
 
@@ -125,7 +130,7 @@ func (t Text) Draw(on tcell.Screen, useStyle ...tcell.Style) {
 			w = 1
 		}
 
-		on.SetContent(horizontalOffset, t.position.Y, c, comb, style)
+		on.SetContent(horizontalOffset, t.position.Y(), c, comb, style)
 		horizontalOffset += w
 	}
 }
@@ -136,13 +141,13 @@ func (b Box) Draw(on tcell.Screen, useStyle ...tcell.Style) {
 		style = useStyle[0]
 	}
 
-	x1 := b.leftTop.X
-	x2 := b.rightBottom.X
-	y1 := b.leftTop.Y
-	y2 := b.rightBottom.Y
+	x1 := b.leftTop.X()
+	x2 := b.rightBottom.X()
+	y1 := b.leftTop.Y()
+	y2 := b.rightBottom.Y()
 
 	hasTitle := false
-	titleStartAt := b.title.position.X
+	titleStartAt := b.title.position.X()
 	titleEndAt := titleStartAt + len(b.title.text) - 1
 	if b.title.text != "" {
 		hasTitle = true
@@ -170,26 +175,30 @@ func (b Box) Draw(on tcell.Screen, useStyle ...tcell.Style) {
 	}
 }
 
-func DrawTextWithAutoLinebreaks(on tcell.Screen, text string, at Position, charactersPerLine int) Position {
-	verticalOffset := at.Y
-	dialogueLength := utf8.RuneCountInString(text)
-	if dialogueLength <= charactersPerLine {
-		NewText(text, 82, verticalOffset).Draw(on, TextStyle)
-		verticalOffset++
-	} else {
-		var linedString string
-		for i, r := range text {
-			linedString += string(r)
+func DrawUnit(unit Drawer, on tcell.Screen) {
+	NewText(string(unit.Icon()), unit.Position().X(), unit.Position().Y()).Draw(on, unit.Style())
+}
 
-			if (i+1)%charactersPerLine == 0 || i+1 == dialogueLength {
-				NewText(linedString, 82, verticalOffset).Draw(on, TextStyle)
-				verticalOffset++
-				linedString = ""
-			}
-		}
+func DrawLocation(location data.Location, on tcell.Screen) {
+	NewBox(
+		location.LeftTop().X(),
+		location.LeftTop().Y(),
+		location.RightBottom().X(),
+		location.RightBottom().Y(),
+		location.Name(),
+	).Draw(on, BoxStyle)
+
+	for _, gameNpc := range location.Npcs() {
+		DrawUnit(gameNpc, on)
 	}
 
-	return Position{X: at.X, Y: verticalOffset}
+	for _, passage := range location.Passages() {
+		DrawUnit(passage, on)
+	}
+
+	for _, object := range location.Objects() {
+		DrawUnit(object, on)
+	}
 }
 
 var (

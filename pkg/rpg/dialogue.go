@@ -1,22 +1,30 @@
 package rpg
 
+type Phrase string
+
 type Dialogue struct {
-	text    string
-	choices []string
+	with    NPC
+	text    Phrase
+	choices []Phrase
 }
 
-func NewDialogue(text string, choices []string) Dialogue {
+func NewDialogue(text Phrase, choices []Phrase) Dialogue {
 	return Dialogue{
+		with:    NoNpc,
 		text:    text,
 		choices: choices,
 	}
 }
 
-func (d Dialogue) Text() string {
+func (d *Dialogue) With() NPC {
+	return d.with
+}
+
+func (d Dialogue) Text() Phrase {
 	return d.text
 }
 
-func (d Dialogue) Choices() []string {
+func (d Dialogue) Choices() []Phrase {
 	return d.choices
 }
 
