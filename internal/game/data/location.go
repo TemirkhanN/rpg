@@ -5,14 +5,15 @@ import (
 )
 
 type Location interface {
-	AddPassage(in Position, out Position, to Location)
 	LeftTop() Position
 	RightBottom() Position
 	Name() string
 	Spawn(npc Npc, position Position)
 	Npcs() []*Npc
-	Objects() []*Object
+	AddPassage(in Position, out Position, to Location)
 	Passages() []Passage
+	PlaceObject(object Object, at Position)
+	Objects() []*Object
 }
 
 type CommonLocation struct {
@@ -66,6 +67,13 @@ func (l *CommonLocation) Spawn(npc Npc, position Position) {
 
 func (l CommonLocation) Npcs() []*Npc {
 	return l.npcs
+}
+
+func (l *CommonLocation) PlaceObject(object Object, at Position) {
+	newObject := object
+	newObject.pos = at
+
+	l.objects = append(l.objects, &newObject)
 }
 
 func (l CommonLocation) Objects() []*Object {

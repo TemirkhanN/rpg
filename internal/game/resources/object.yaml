@@ -1,3 +1,4 @@
 - id: 1
   name: EvergreenTree
   icon: 🌲
+  solid: true

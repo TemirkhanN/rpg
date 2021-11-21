@@ -3,9 +3,19 @@ package data
 import "github.com/gdamore/tcell"
 
 type Object struct {
+	name  string
 	solid bool
 	pos   Position
 	icon  rune
+}
+
+func NewObject(name string, icon rune, solid bool) Object {
+	return Object{
+		name:  name,
+		solid: solid,
+		pos:   NoPosition,
+		icon:  icon,
+	}
 }
 
 func (o Object) Solid() bool {

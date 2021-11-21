@@ -12,24 +12,33 @@ import (
 	"github.com/TemirkhanN/rpg/pkg/rpg"
 )
 
-type UnicodeIcon rune
+type unicodeIcon rune
 
-func (r *UnicodeIcon) UnmarshalYAML(n *yaml.Node) error {
+type id int
+
+func (r *unicodeIcon) UnmarshalYAML(n *yaml.Node) error {
 	var s string
 	if err := n.Decode(&s); err != nil {
 		return errors.Unwrap(err)
 	}
 
 	rn, _ := utf8.DecodeRune([]byte(s))
-	*r = UnicodeIcon(rn)
+	*r = unicodeIcon(rn)
 
 	return nil
 }
 
+type object struct {
+	ID    id
+	Icon  unicodeIcon
+	Solid bool
+	Name  string
+}
+
 type npc struct {
-	ID   int
+	ID   id
 	Name string
-	Icon UnicodeIcon
+	Icon unicodeIcon
 }
 
 type dialogue struct {
@@ -43,16 +52,20 @@ type position struct {
 }
 
 type location struct {
-	ID   int
+	ID   id
 	Name string
 	Npcs []struct {
-		ID       int
+		ID       id
 		Position position
 	}
 	Passages []struct {
 		In  position
 		Out position
-		To  int
+		To  id
+	}
+	Objects []struct {
+		ID       id
+		Position position
 	}
 }
 
@@ -61,32 +74,64 @@ var resourceDir embed.FS
 
 type Resources struct {
 	initialized bool
-	npcs        map[int]data.Npc
-	locations   map[int]data.Location
+	npcs        map[id]data.Npc
+	objects     map[id]data.Object
+	locations   map[id]data.Location
 }
 
 func LoadResources() Resources {
 	res := Resources{
 		initialized: true,
 		npcs:        nil,
-		locations:   make(map[int]data.Location),
+		objects:     nil,
+		locations:   make(map[id]data.Location),
 	}
 
+	res.loadObjects()
 	res.loadNpcs()
 
 	return res
 }
 
+func (r *Resources) loadObjects() {
+	yamlFile, err := resourceDir.ReadFile("object.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	allObjects := make([]object, 0)
+	_ = yaml.Unmarshal(yamlFile, &allObjects)
+
+	r.objects = make(map[id]data.Object, len(allObjects))
+
+	for _, objectDetails := range allObjects {
+		r.objects[objectDetails.ID] = data.NewObject(
+			objectDetails.Name,
+			rune(objectDetails.Icon),
+			objectDetails.Solid,
+		)
+	}
+}
+
+func (r Resources) GetObject(id id) (data.Object, error) {
+	object, exists := r.objects[id]
+	if !exists {
+		return data.Object{}, fmt.Errorf("object with id %d does not exist", id)
+	}
+
+	return object, nil
+}
+
 func (r *Resources) loadNpcs() {
-	npcFile, err := resourceDir.ReadFile("npc.yaml")
+	yamlFile, err := resourceDir.ReadFile("npc.yaml")
 	if err != nil {
 		panic(err)
 	}
 
 	allNpc := make([]npc, 0)
-	_ = yaml.Unmarshal(npcFile, &allNpc)
+	_ = yaml.Unmarshal(yamlFile, &allNpc)
 
-	r.npcs = make(map[int]data.Npc, len(allNpc))
+	r.npcs = make(map[id]data.Npc, len(allNpc))
 
 	for _, npcDetails := range allNpc {
 		r.npcs[npcDetails.ID] = *data.NewNpc(
@@ -121,7 +166,7 @@ func loadDialogues(n npc) map[rpg.Phrase]rpg.Dialogue {
 	return dialogues
 }
 
-func (r Resources) GetNPC(id int) (data.Npc, error) {
+func (r Resources) GetNPC(id id) (data.Npc, error) {
 	npc, exists := r.npcs[id]
 	if !exists {
 		return data.Npc{}, fmt.Errorf("NPC with id %d does not exist", id)
@@ -130,7 +175,7 @@ func (r Resources) GetNPC(id int) (data.Npc, error) {
 	return npc, nil
 }
 
-func (r Resources) LoadLocation(id int) (data.Location, error) {
+func (r Resources) LoadLocation(id id) (data.Location, error) {
 	loc, exists := r.locations[id]
 	if exists {
 		return loc, nil
@@ -149,7 +194,7 @@ func (r Resources) LoadLocation(id int) (data.Location, error) {
 			continue
 		}
 
-		loc := data.NewLocation(rpg.NewLocation(locationDetails.ID, locationDetails.Name))
+		loc := data.NewLocation(rpg.NewLocation(int(locationDetails.ID), locationDetails.Name))
 
 		for _, passageDetails := range locationDetails.Passages {
 			leadsToID := passageDetails.To
@@ -184,6 +229,12 @@ func (r Resources) LoadLocation(id int) (data.Location, error) {
 			}
 
 			loc.Spawn(npc, data.NewPos(npcOnLocation.Position.X, npcOnLocation.Position.Y))
+		}
+
+		for _, objectInLocation := range locationDetails.Objects {
+			object, _ := r.GetObject(objectInLocation.ID)
+
+			loc.PlaceObject(object, data.NewPos(objectInLocation.Position.X, objectInLocation.Position.Y))
 		}
 
 		r.locations[id] = &loc
@@ -239,6 +290,12 @@ func (ll lazyLoadLocation) Npcs() []*data.Npc {
 	ll.load()
 
 	return ll.location.Npcs()
+}
+
+func (ll *lazyLoadLocation) PlaceObject(object data.Object, at data.Position) {
+	ll.load()
+
+	ll.location.PlaceObject(object, at)
 }
 
 func (ll lazyLoadLocation) Objects() []*data.Object {
