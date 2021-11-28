@@ -3,5 +3,6 @@ package main
 import "github.com/TemirkhanN/rpg/internal/game"
 
 func main() {
-	game.New("Nova").Start()
+	newGame := game.New("Nova")
+	newGame.Start()
 }

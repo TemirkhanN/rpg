@@ -23,8 +23,8 @@ type MainScene struct {
 	res resources.Resources
 }
 
-func NewMainScene(resources resources.Resources, player *rpg.Player) *MainScene {
-	mainScene := &MainScene{
+func NewMainScene(resources resources.Resources, player *rpg.Player) MainScene {
+	mainScene := MainScene{
 		player: data.NewPlayer(player),
 		res:    resources,
 	}

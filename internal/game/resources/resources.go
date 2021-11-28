@@ -134,7 +134,7 @@ func (r *Resources) loadNpcs() {
 	r.npcs = make(map[id]data.Npc, len(allNpc))
 
 	for _, npcDetails := range allNpc {
-		r.npcs[npcDetails.ID] = *data.NewNpc(
+		r.npcs[npcDetails.ID] = data.NewNpc(
 			rpg.NewNPC(npcDetails.Name, loadDialogues(npcDetails)),
 			rune(npcDetails.Icon),
 			data.NoPosition,
@@ -175,7 +175,7 @@ func (r Resources) GetNPC(id id) (data.Npc, error) {
 	return npc, nil
 }
 
-func (r Resources) LoadLocation(id id) (data.Location, error) {
+func (r Resources) LoadLocation(id id) (nilLoc data.Location, err error) {
 	loc, exists := r.locations[id]
 	if exists {
 		return loc, nil
@@ -212,7 +212,7 @@ func (r Resources) LoadLocation(id id) (data.Location, error) {
 			}
 
 			if err != nil {
-				return &data.CommonLocation{}, fmt.Errorf("location %d has passage to unknown location %d", id, leadsToID)
+				return nilLoc, fmt.Errorf("location %d has passage to unknown location %d", id, leadsToID)
 			}
 
 			loc.AddPassage(
@@ -242,7 +242,7 @@ func (r Resources) LoadLocation(id id) (data.Location, error) {
 		return r.locations[id], nil
 	}
 
-	return &data.CommonLocation{}, fmt.Errorf("location with id %d does not exist", id)
+	return nilLoc, fmt.Errorf("location with id %d does not exist", id)
 }
 
 type lazyLoadLocation struct {
@@ -286,7 +286,7 @@ func (ll *lazyLoadLocation) Spawn(npc data.Npc, position data.Position) {
 	ll.location.Spawn(npc, position)
 }
 
-func (ll lazyLoadLocation) Npcs() []*data.Npc {
+func (ll lazyLoadLocation) Npcs() []data.Npc {
 	ll.load()
 
 	return ll.location.Npcs()
@@ -298,7 +298,7 @@ func (ll *lazyLoadLocation) PlaceObject(object data.Object, at data.Position) {
 	ll.location.PlaceObject(object, at)
 }
 
-func (ll lazyLoadLocation) Objects() []*data.Object {
+func (ll lazyLoadLocation) Objects() []data.Object {
 	ll.load()
 
 	return ll.location.Objects()

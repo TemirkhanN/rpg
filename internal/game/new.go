@@ -21,14 +21,17 @@ func (g Game) Screen() tcell.Screen {
 	return g.screen
 }
 
-func New(playerName string) *Game {
-	newGame := new(Game)
-	newGame.resources = resources.LoadResources()
+func New(playerName string) Game {
 	newPlayer := rpg.NewPlayer(playerName)
-	newGame.player = &newPlayer
+	screen := ui.CreateScreen()
+	screen.EnableMouse()
 
-	newGame.screen = ui.CreateScreen()
-	newGame.screen.EnableMouse()
+	newGame := Game{
+		player:      &newPlayer,
+		resources:   resources.LoadResources(),
+		screen:      screen,
+		activeScene: nil,
+	}
 
 	newGame.activeScene = scenes.NewMainScene(newGame.resources, newGame.player)
 

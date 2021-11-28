@@ -37,7 +37,7 @@ func (p Pos) Y() int {
 }
 
 type Box struct {
-	title       *Text
+	title       Text
 	leftTop     Pos
 	rightBottom Pos
 }
@@ -84,8 +84,8 @@ func NewBox(x1 int, y1 int, x2 int, y2 int, title ...string) Box {
 	}
 }
 
-func NewText(value string, posX int, posY int) *Text {
-	return &Text{
+func NewText(value string, posX int, posY int) Text {
+	return Text{
 		text:     value,
 		position: Pos{x: posX, y: posY},
 	}

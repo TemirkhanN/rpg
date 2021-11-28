@@ -9,19 +9,19 @@ type Location interface {
 	RightBottom() Position
 	Name() string
 	Spawn(npc Npc, position Position)
-	Npcs() []*Npc
+	Npcs() []Npc
 	AddPassage(in Position, out Position, to Location)
 	Passages() []Passage
 	PlaceObject(object Object, at Position)
-	Objects() []*Object
+	Objects() []Object
 }
 
 type CommonLocation struct {
 	leftTop     Position
 	rightBottom Position
 	whereabouts rpg.Location
-	npcs        []*Npc
-	objects     []*Object
+	npcs        []Npc
+	objects     []Object
 	passages    []Passage
 }
 
@@ -59,24 +59,22 @@ func (l CommonLocation) Name() string {
 }
 
 func (l *CommonLocation) Spawn(npc Npc, position Position) {
-	spawnedNpc := npc
-	spawnedNpc.position = position
+	npc.position = position
 
-	l.npcs = append(l.npcs, &spawnedNpc)
+	l.npcs = append(l.npcs, npc)
 }
 
-func (l CommonLocation) Npcs() []*Npc {
+func (l CommonLocation) Npcs() []Npc {
 	return l.npcs
 }
 
 func (l *CommonLocation) PlaceObject(object Object, at Position) {
-	newObject := object
-	newObject.pos = at
+	object.pos = at
 
-	l.objects = append(l.objects, &newObject)
+	l.objects = append(l.objects, object)
 }
 
-func (l CommonLocation) Objects() []*Object {
+func (l CommonLocation) Objects() []Object {
 	return l.objects
 }
 

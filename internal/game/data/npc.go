@@ -12,8 +12,8 @@ type Npc struct {
 	position Position
 }
 
-func NewNpc(template rpg.NPC, icon rune, pos Position) *Npc {
-	return &Npc{
+func NewNpc(template rpg.NPC, icon rune, pos Position) Npc {
+	return Npc{
 		icon:     icon,
 		template: template,
 		position: pos,

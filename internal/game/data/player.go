@@ -97,7 +97,7 @@ func (p *Player) MoveTo(to Position) {
 
 	for _, npc := range currentLocation.Npcs() {
 		if npc.Collides(to) {
-			p.StartDialogue(*npc)
+			p.StartDialogue(npc)
 
 			return
 		}
